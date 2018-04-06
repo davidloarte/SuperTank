@@ -1,29 +1,28 @@
-void movimiento_Bola() {
-  146 
-  147     //                Movimiento de la bola
-  148     //   gotoxy(xbola,ybola); printf("   ");
-  149     gotoxy(xbola,ybola); printf("(_)");
-  150 
-  151     xbola = xbola + ( xvel * xdireccion );
-  152     ybola = ybola + ( yvel * ydireccion );
-  153 
-  154 
-  155     if ( ((xbola == xpala)||(xbola+1 == xpala)||(xbola+2 == xpala)) && ((ybola == ypala)||(ybola == ypala+1)||(ybola == ypala+2)||(ybola == ypala+3)||(ybola == ypala+4)) ){
-  156         xdireccion *= -1;
-  157         ydireccion *= -1;
-  158     }
-  159     if ( ((xbola == xpala1)||(xbola+1 == xpala1)||(xbola+2 == xpala1)) && ((ybola == ypala1)||(ybola == ypala1+1)||(ybola == ypala1+2)||(ybola == ypala1+3)||(ybola == ypala1+3)) ){
-  160         xdireccion *= -1;
-  161         ydireccion *= -1;
-  162     }
-  163 
-  164    if((xbola<=5)|| (xbola>=99))
-  165         xdireccion *= -1;
-  166     if((ybola<=3) || (ybola>=29))
-  167         ydireccion *= -1;
-  168 
-  169 
-  170 
-  171     gotoxy(55,8);printf("%d , %d", xbola,ybola);            // situacion de la bola
-  172     gotoxy(55,10);printf("%c", flecha);            // situacion de la bola
-  173 }
+void movimiento_bala() {
+  
+      //                Movimiento de la bola
+      //   gotoxy(xbola,ybola); printf("   ");
+      gotoxy(bala.x,ybola); printf("⦿");
+//  • bala normal por si queremos usar la otra bala para algo
+      xbola = bala.x + ( xvel * 1 );
+      ybola = bala.y + ( yvel * 1 );
+  
+  
+      if ( ((bala.x == tank.x)||(bala.x+1 == tank.x)||(bala.x+2 == tank.x)) && ((bala.y == pala.y)||(bala.y ==pala.y+1)||(bala.y ==pala.y+2)||(bala.y ==pala.y+3)||(bala.y ==pala.y+4)) ){
+         
+      }
+      /*if ( ((bala.x == xpala1)||(bala.x+1 == xpala1)||(bala.x+2 == xpala1)) && ((bala.y == ypala1)||(bala.y == ypala1+1)||(bala.y == ypala1+2)||(bala.y == ypala1+3)||(bala.y == ypala1+3)) ){
+          xdireccion *= -1;
+          ydireccion *= -1;
+2     }*/
+  
+     if((bala.x<=5)|| (bala.x>=99))
+          xdireccion *= -1;
+      if((bala.y<=3) || (bala.y>=29))
+          ydireccion *= -1;
+  
+  
+  
+      gotoxy(55,8);printf("%d , %d", bala.x,bala.y);            // situacion de la bala
+      gotoxy(55,10);printf("%c", flecha);            // situacion de la bala
+  }
