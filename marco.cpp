@@ -11,9 +11,24 @@
 #define maxf (fila-1)
 #define maxc (columna-1)
 
+
+void gotoxy(int x, int y){
+    int MAX_SCREEN_AREA = 100;
+    char essq[MAX_SCREEN_AREA]={0};
+    sprintf(essq, "\033[%d;%df", y,x);
+        printf("%s", essq);
+}
+}
+
 char matriz[fila][columna];
 
+void pintar_limites(){
+  for(int x = 2; x<78; x++){
+        gotoxy(int x,3); printf("%c",205);
+        gotoxy(int y,23);printf("%c", 205);
+  }
 
+}
 
 void dibujar_Marco(){
 
@@ -46,6 +61,8 @@ int main() {
      /*TODO pasar todo a double y comprobar que funcione bien*/
 
 
+     pintar_limites();
+     dibujar_Marco();
      char matriz[fila][columna];
 
      for(int i=0;i<fila;i++) {
@@ -57,7 +74,6 @@ int main() {
 
      while(1){
          system("clear");
-           dibujar_Marco();
         usleep(60000);
      }
      return 0;
