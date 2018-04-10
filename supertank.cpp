@@ -9,7 +9,7 @@
 
 #include <time.h>
 
-//#include <curses.h>*/
+#include <curses.h>
 
 #define fila  45
 #define columna 200
@@ -105,9 +105,10 @@ int main() {
 
 
     while(1){
+        system("setterm -cursor off");
         system("clear");
 
-        dibujar_Marco();
+//        dibujar_Marco();
 
         movimiento_Bola();
         pintar_tank1();
@@ -215,7 +216,7 @@ void teclas(){
         __fpurge(stdin);
         }
         else{*/
-    if (kbhit()){
+
         flecha=mygetch();
 
         if(flecha=='w' && tank.y>=minf+3)
@@ -227,8 +228,8 @@ void teclas(){
         if(flecha=='d' && tank.x<=maxc-2)
             tank.x++;
         __fpurge(stdin);
+        fflush(stdout);
 
-    }
     //  }    //close(STDIN_FILENO);
     //kbhit()
 
@@ -243,6 +244,12 @@ void tank1() {
 
         gotoxy(tank.x,tank.y);
         printf("█");
+        gotoxy(tank.x+1,tank.y);
+        printf("█");
+        gotoxy(tank.x,tank.y+1);
+        printf("█");
+        gotoxy(tank.x+1,tank.y+1);
+        printf("█");
         /*   gotoxy(xpala,ypala+1);
              printf("█");
              gotoxy(xpala,ypala+2);
@@ -251,8 +258,9 @@ void tank1() {
              printf("█");
              gotoxy(xpala,ypala+4);
              printf("█");*/
-
+     
         teclas();
+          fflush(stdout);
     }
 
 }
@@ -274,10 +282,10 @@ void tank1() {
    teclas();
    }
    }
-   */
+
 void dibujar_Marco(){
 
-    /*Dibujar marco*/
+    Dibujar marco
 
 
     for(int f=0; f<fila;f++) {
@@ -301,12 +309,19 @@ void dibujar_Marco(){
     }
 
 }
-
+*/
 void pintar_tank1(){
     gotoxy(55,5);printf("%d , %d", tank.x,tank.y);
 
-    gotoxy(tank.x,tank.y);
-    printf("█");
+         gotoxy(tank.x,tank.y);
+        printf("█");
+        gotoxy(tank.x+1,tank.y);
+        printf("█");
+        gotoxy(tank.x,tank.y+1);
+        printf("█");
+        gotoxy(tank.x+1,tank.y+1);
+        printf("█");
+          fflush(stdout);
     /*   gotoxy(xpala,ypala+1);
          printf("█");
          gotoxy(xpala,ypala+2);
