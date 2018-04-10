@@ -40,7 +40,7 @@ char map[M][N] = {
 void Map(){
 	for(int f = 0; f < M; f++) {
 		for (int c=0; c< N; c++ ){
-			/*printf("%d\n", map[] );*/
+			/*printf("%d\n", map[] );*/ 
 
 			if(map[f][c]==0)
 				printf(" ");
