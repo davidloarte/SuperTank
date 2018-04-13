@@ -3,10 +3,11 @@
 all: SuperTank
 
 SuperTank: supertank.o
-	g++ -o supertank supertank.o -lncursesw
+		gcc supertank.cpp  $(ncursesw5-config --cflags) -c
+
 
 supertank.o: supertank.cpp
-	g++ -c supertank.cpp -o supertank.o
+		gcc supertank.o  $(ncursesw5-config --libs) -o supertank
 
 clean:
 	$(RM) supertank.o supertank

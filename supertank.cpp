@@ -81,7 +81,7 @@ int main() {
     blockA  A;
     iniciar_Curses();
 
-    
+
     getmaxyx(stdscr,row,col);
 
     while(teclas(&tank.x,&tank.y) != KEY_BREAK){
@@ -163,8 +163,11 @@ void Map(){
                 printw(" ");
             if(map[f][c]==1)
                 printw("#");
-            if(map[f][c]==2)
-                printw("█");
+            if(map[f][c]==2){
+//                addstr("█");
+                const wchar_t* block = L"\x2593";
+                addwstr("\0xE2\0x96\0x88");
+            }
         }
         printw("\n");
     }
