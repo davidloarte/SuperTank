@@ -15,8 +15,6 @@
 #define xInicio 10
 #define yInicio 10
 
-#define DY 0.31
-
 char tmp_map[fila][columna];
 char map[fila][columna] = {
     {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2},
@@ -60,39 +58,40 @@ typedef struct block {
     int y;
 } blockB;
 
+//Tank
 typedef struct tanks {
     double x = 0;
     double y = 0;
-    double Vx = 0.3;
-    double Vy = 0.3;
 } Tanks;
 Tanks tank;
 
-
+//Funciones de Curses
 void iniciar_Curses();
 void finalizar_Curses();
 
-
+//Funciones del juego
 void Map();
-int teclas(double *Vx, double *Vy);
+int teclas(double *x, double *y);
 void tank1(int y, int x);
-void movimiento(double *x, double *y, double vx, double vy);
 
+int row,col;
 
 int main() {
     blockB  B;
     blockA  A;
-        iniciar_Curses();
-    while(teclas(&tank.Vx,&tank.Vy) != KEY_BREAK){
-        movimiento( &tank.x, &tank.y, tank.Vx, tank.Vy);
-        Map();
-        tank1( (int) tank.x, (int) tank.y);
+    iniciar_Curses();
 
-        usleep(60000);
+    
+    getmaxyx(stdscr,row,col);
+
+    while(teclas(&tank.x,&tank.y) != KEY_BREAK){
+     Map();
+     //tank1( (int) tank.x, (int) tank.y);
+     usleep(60000);
 
     }
-         finalizar_Curses();
-         return 0;
+    finalizar_Curses();
+    return 0;
 }
 
 void iniciar_Curses(){
@@ -109,54 +108,65 @@ void finalizar_Curses(){
 }
 
 
-int teclas(double *Vx, double *Vy){
+int teclas(double *x, double *y){
 
     int flecha;
 
     flecha = getch();
-//    check_collision();
-     switch(flecha){
+    //    check_collision();
+    switch(flecha){
 
         case KEY_UP:
-            *Vy -= DY;
+            *y += 1;
             break;
         case KEY_DOWN:
-             *Vy += DY;
+            *y -= 1;
+            if(*y <0)
+                *y=0;
             break;
         case KEY_LEFT:
-              *Vx -= DY;
-             break;
+            *x += 1;
+            break;
         case KEY_RIGHT:
-             *Vx += DY;
+            *x -= 1;
+            if(*x <0)
+                *x=0;
             break;
     }
-   return flecha;
-}
-
-void movimiento(double *x, double *y, double vx, double vy){
-            *x += vx;
-            *y += vy;
+    return flecha;
 }
 
 void tank1(int x, int y) {
+    int algo;
     clear();
-    mvprintw(yInicio - y, xInicio - x,"█");
+    algo=mvprintw(yInicio - y, xInicio - x,"H");
+    if(ERR == algo){
+        mvprintw(row-2,0,"This screen has %d rows and %d columns\n",row,col);
+        mvprintw(row-1,0,"errah, %i,%i no es una direccio valida\n", yInicio - y, xInicio - x);
+        /*
+        fprintf(stderr, "errah, %i,%i no es una direccio valida\n", yInicio - y, xInicio - x);
+        if((xInicio - x)<0)
+              tank1(x+1, y);
+        if((yInicio - y)<0)
+            tank1(x, y+1);*/
+    }
+    mvprintw(row-1,0,"tank 1 está en, %i,%i", yInicio - y, xInicio - x);
     refresh();
 }
 
 void Map(){
+    clear();
     for(int f = 0; f < fila; f++) {
         for (int c=0; c< columna; c++ ){
 
             if(map[f][c]==0)
-                printf(" ");
+                printw(" ");
             if(map[f][c]==1)
-                printf("#");
-
+                printw("#");
             if(map[f][c]==2)
-                printf("█");
+                printw("█");
         }
-        printf("\n");
+        printw("\n");
     }
-    refresh();
+  refresh();
 }
