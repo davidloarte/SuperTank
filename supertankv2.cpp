@@ -49,10 +49,8 @@ char map[fila][columna] = {
     {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2}
 };
 int flecha;
-int checkRIGHT = 0;
-int checkLEFT = 0;
-int checkUP = 0;
-int checkDOWN = 0;
+int checky = 0;
+int checkx = 0;
 int lastKey = 0;
 //Bloques
 
@@ -125,78 +123,79 @@ void finalizar_Curses(){
     endwin();
 }
 
+
 int teclas(double *x, double *y){
 
+
     flecha = getch();
-    if(flecha != -1)
-        lastKey = flecha;
 
     //    check_collision();
     mvprintw(row-5,0,"flecha es %i, y lastkey es %i", flecha, lastKey);
-    mvprintw(row-6,0,"ccheckRIGHT: %i, checkDOWN: %i, checkLEFT: %i, checkU: %i", checkRIGHT, checkDOWN, checkLEFT, checkUP);
+    mvprintw(row-6,0,"checkx es %i, y checky es %i", checkx,checky);
+
     switch(flecha){
 
         case KEY_UP:
-            if(checkUP != 0){
-                *y += 1;
-                if(*y > ((minf-1) + yInicio ))//Up limit 9
-                    *y -= 1;
+            //            if(view(flecha) == true){//Check View
 
-                checkRIGHT = 0;
-                checkDOWN  = 0;
-                checkLEFT  = 0;
+
+             if(lastKey == flecha){
+            *y += 1;
+            if(*y > ((minf-1) + yInicio ))//Up limit 9
+                *y -= 1;
             }
-            checkUP += 1;
-            if(checkUP > 1)
-                checkUP -= 1;
-            break;
+
+           break;
 
         case KEY_LEFT:
-          if(checkLEFT != 0){
-                *x += 1;
-                if(*x > ((minc-1) + xInicio ))//Left limit 9
-                    *x -= 1;
-                checkRIGHT = 0;
-                checkDOWN  = 0;
-                checkUP    = 0;
-            }
-
-            checkLEFT += 1;
-            if(checkLEFT > 1)
-                checkLEFT -= 1;
-            break;
+             if(lastKey == flecha){
+           *x += 1;
+            if(*x > ((minc-1) + xInicio ))//Left limit 9
+                *x -= 1;
+             }
+           break;
 
         case KEY_DOWN:
-            if(checkDOWN != 0){
-                *y -= 1;
-                if( *y < ((yInicio)+ ( (-maxf)+1 )) )// Down limit -15
-                    *y += 1;
-                checkRIGHT = 0;
-                checkLEFT  = 0;
-                checkUP    = 0;
-            }
-
-            checkDOWN -= 1;
-            if(checkDOWN < -1)
-                checkDOWN += 1;
-            break;
+              if(lastKey == flecha){
+                  *y -= 1;
+            if( *y < ((yInicio)+ ( (-maxf)+1 )) )// Down limit -15
+                *y += 1;
+              }
+                        break;
 
         case KEY_RIGHT:
-            if(checkRIGHT != 0){
-                *x -= 1;
-                if( *x < ((xInicio)+ ( (-maxc)+1 )) )// Right limit -30
-                    *x += 1;
-                checkDOWN  = 0;
-                checkLEFT  = 0;
-                checkUP    = 0;
-            }
-            checkRIGHT -= 1;
-            if(checkRIGHT < -1)
-                checkRIGHT += 1;
+              if(lastKey == flecha){
+                  *x -= 1;
+            if( *x < ((xInicio)+ ( (-maxc)+1 )) )// Right limit -30
+                *x += 1;
+              }
             break;
     }
     refresh();
-    return flecha;
+    if(flecha != -1){
+      lastKey = flecha;
+
+      if(flecha = 258)
+      {checky = 1;}
+      else
+          checky = 0;
+
+      if(flecha = 259)
+      {checky = 2;}
+      else
+          checky =0;
+
+      if(flecha = 260)
+      {checky = 3;}
+      else
+          checky =0;
+      if(flecha = 261)
+      {checky = 4;}
+      else
+          checky =0;
+    }
+
+    return flecha, checky, checkx;
 }
 
 void tank1(int x, int y) {
