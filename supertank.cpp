@@ -5,6 +5,9 @@
 #include <unistd.h>
 #include <ncurses.h>
 
+//For UTF-8
+#include <locale.h>
+
 #define fila  27
 #define columna 42
 
@@ -79,15 +82,17 @@ int row,col;
 int main() {
     blockB  B;
     blockA  A;
+    setlocale(LC_ALL,"");
     iniciar_Curses();
 
 
     getmaxyx(stdscr,row,col);
 
     while(teclas(&tank.x,&tank.y) != KEY_BREAK){
+     clear();
      Map();
-     //tank1( (int) tank.x, (int) tank.y);
-     usleep(60000);
+     tank1( (int) tank.x, (int) tank.y);
+     usleep(20000);
 
     }
     finalizar_Curses();
@@ -118,19 +123,26 @@ int teclas(double *x, double *y){
 
         case KEY_UP:
             *y += 1;
+            if(*y > ((minf-1) + yInicio ))//Up limit 9
+                *y -= 1;
             break;
-        case KEY_DOWN:
-            *y -= 1;
-            if(*y <0)
-                *y=0;
-            break;
+
         case KEY_LEFT:
             *x += 1;
+            if(*x > ((minc-1) + xInicio ))//Left limit 9
+                *x -= 1;
+             break;
+
+        case KEY_DOWN:
+            *y -= 1;
+            if( *y < ((yInicio)+ ( (-maxf)+1 )) )// Down limit -15
+                *y += 1;
             break;
+
         case KEY_RIGHT:
             *x -= 1;
-            if(*x <0)
-                *x=0;
+             if( *x < ((xInicio)+ ( (-maxc)+1 )) )// Right limit -30
+                *x += 1;
             break;
     }
     return flecha;
@@ -138,7 +150,7 @@ int teclas(double *x, double *y){
 
 void tank1(int x, int y) {
     int algo;
-    clear();
+
     algo=mvprintw(yInicio - y, xInicio - x,"H");
     if(ERR == algo){
         mvprintw(row-2,0,"This screen has %d rows and %d columns\n",row,col);
@@ -151,11 +163,11 @@ void tank1(int x, int y) {
             tank1(x, y+1);*/
     }
     mvprintw(row-1,0,"tank 1 está en, %i,%i", yInicio - y, xInicio - x);
+    mvprintw(row-2,0,"tank 1 está en, %i,%i", y, x);
     refresh();
 }
 
 void Map(){
-    clear();
     for(int f = 0; f < fila; f++) {
         for (int c=0; c< columna; c++ ){
 
@@ -164,9 +176,8 @@ void Map(){
             if(map[f][c]==1)
                 printw("#");
             if(map[f][c]==2){
-//                addstr("█");
-                const wchar_t* block = L"\x2593";
-                addwstr("\0xE2\0x96\0x88");
+                const wchar_t* block = L"\u2588";
+                addwstr(block);
             }
         }
         printw("\n");
