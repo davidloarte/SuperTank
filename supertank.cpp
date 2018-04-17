@@ -20,7 +20,7 @@
 
 #define N 50
 #define M 50
-#define nBullets 100
+#define MAX_BULLETS 100
 
 char tmp_map[fila][columna];
 char map[fila][columna] = {
@@ -76,8 +76,10 @@ struct Tanks {
 };
 
 struct Bullets {
-    double xStart = 0;
-    double yStart = 0;
+    double posx;
+    double posy;
+    double dir ;
+
 };
 
 
@@ -88,15 +90,17 @@ void finalizar_Curses();
 //Funciones del juego
 void Map();
 int teclas(struct Tanks *move);
-void tank1(int y, int x, struct Bullets pos);
+void tank1(int y, int x, struct Bullets *pos);
 
 int row,col;
+struct Bullets *bullet[MAX_BULLETS] = {NULL};
+void printbullet(struct Bullets *shot, struct Tanks *warCar);
 
 int main() {
     struct BlockUnbreakable blockU[N];
     struct Block block[M];
     struct Tanks tank;
-    struct Bullets bullet;
+
 
     setlocale(LC_ALL,"");
     iniciar_Curses();
@@ -107,8 +111,9 @@ int main() {
     while(teclas(&tank) != KEY_BREAK){
         clear();
         Map();
-        tank1( (int) tank.x, (int) tank.y, bullet);
+        tank1( (int) tank.x, (int) tank.y, bullet[MAX_BULLETS]);
         teclas(&tank);
+        printbullet(bullet[MAX_BULLETS],&tank);
 
         usleep(20000);
 
@@ -204,7 +209,7 @@ int teclas(struct Tanks *move){
     return arrow;
 }
 
-void tank1(int x, int y, struct Bullets pos) {
+void tank1(int x, int y, struct Bullets *pos) {
     int algo;
 
     algo=mvprintw(yInicio - y, xInicio - x,"H");
@@ -220,9 +225,76 @@ void tank1(int x, int y, struct Bullets pos) {
     }
     mvprintw(row-1,0,"tank 1 está en, %i,%i", yInicio - y, xInicio - x);
     mvprintw(row-2,0,"tank 1 está en, %i,%i", y, x);
-    mvprintw(row-3,0,"bala está en, %i,%i", pos.yStart, pos.xStart);
+//    mvprintw(row-3,0,"bala está en, %i,%i", pos.posy, pos.posx);
 
     refresh();
+}
+void addBullet(double x, double y, double direction){
+
+    int found = -1;
+    for(int i = 0; i < MAX_BULLETS; i++)
+    {
+        if(bullet[i] == NULL)
+        {
+            found = i;
+            break;
+        }
+    }
+
+    if(found >= 0)
+    {
+        int i = found;
+        bullet[i] = (Bullets*) malloc(sizeof(Bullets));
+        bullet[i]->posx = x;
+        bullet[i]->posy = y;
+        bullet[i]->dir = direction;
+    }
+}
+
+void removeBullet(int i){
+    if(bullet[i])
+    {
+        free(bullet[i]);
+        bullet[i] = NULL;
+    }
+}
+/*void updateBullet(struct Tanks *warCar){
+    addBullet(&warCar);
+
+}*/
+void printbullet(struct Bullets *shot, struct Tanks *warCar){
+
+    arrow = getch();
+
+    switch(arrow){
+
+        case 'b':
+            if(checkUP == 1){
+
+                addBullet(warCar->x,warCar->y,shot->dir);
+                shot->dir++;
+                mvprintw(shot->posy,shot->posx,"hey");
+                refresh();
+
+
+
+/*            if(checkUP)
+                (*shot).dir += 1;
+            if(checkDOWN)
+                (*shot).dir -= 1;
+            if(checkLEFT)
+                (*shot).dir += 1;
+            if(checkRIGHT)
+                (*shot).dir -= 1;*/
+            //            (*shot).y += 1;
+//                if((*shot).y > ((minf-1) + yInicio ))//Up limit 9
+//                    (*shot).y -= 1;
+            }
+
+            break;
+
+
+}
 }
 
 void Map(){
@@ -234,7 +306,7 @@ void Map(){
             if(map[f][c]==1)
                 printw("#");
             if(map[f][c]==2){
-//                const wchar_t* block = L"\u2588"; // caracter utf-8 
+//                const wchar_t* block = L"\u2588"; // caracter utf-8
 //                addwstr(block);    //necesitas ncursesw para caracteres largos tipo unicode
                 printw("X");
             }
