@@ -89,7 +89,7 @@ void finalizar_Curses();
 
 //Funciones del juego
 void Map();
-int teclas(struct Tanks *move);
+int teclas(struct Tanks *move, struct Bullets *moveBullet);
 void tank1(int y, int x, struct Bullets *pos);
 
 int row,col;
@@ -108,12 +108,12 @@ int main() {
 
     getmaxyx(stdscr,row,col);
 
-    while(teclas(&tank) != KEY_BREAK){
+    while(teclas(&tank,bullet[MAX_BULLETS]) != KEY_BREAK){
         clear();
         Map();
         tank1( (int) tank.x, (int) tank.y, bullet[MAX_BULLETS]);
-        teclas(&tank);
-        printbullet(bullet[MAX_BULLETS],&tank);
+        teclas(&tank,bullet[MAX_BULLETS]);
+    //    printbullet(bullet[MAX_BULLETS],&tank);
 
         usleep(20000);
 
@@ -135,7 +135,7 @@ void finalizar_Curses(){
     endwin();
 }
 
-int teclas(struct Tanks *move){
+int teclas(struct Tanks *move, struct Bullets *moveBullet){
 
     arrow = getch();
     if(arrow != -1)
@@ -204,6 +204,45 @@ int teclas(struct Tanks *move){
             if(checkRIGHT < -1)
                 checkRIGHT += 1;
             break;
+        case 'b':
+
+            
+
+            int direction = 0;
+            int found = -1;
+            if(checkRIGHT = -1)
+                mvprintw((*move).y-1,(*move).x, "*");
+
+            if(checkLEFT = 1)
+                mvprintw((*move).y+1,(*move).x, "*");
+
+            if(checkUP = 1)
+                mvprintw((*move).y-1,(*move).x, "*");
+
+            if(checkDOWN = -1)
+                mvprintw((*move).y+1,(*move).x, "*");
+
+
+            for(int i = 0; i < MAX_BULLETS; i++)
+            {
+                if(bullet[i] == NULL)
+                {
+                    found = i;
+                    break;
+                }
+            }
+
+            if(found >= 0)
+            {
+                int i = found;
+                bullet[i] = (Bullets*) malloc(sizeof(Bullets));
+                bullet[i]->posx = (*move).x;
+                bullet[i]->posy = (*move).y;
+                bullet[i]->dir = direction;
+            }           //updateBullet((*moveBullet).y,(*moveBullet).x);
+
+
+            break;
     }
     refresh();
     return arrow;
@@ -262,18 +301,10 @@ void removeBullet(int i){
     addBullet(&warCar);
 
 }*/
-void printbullet(struct Bullets *shot, struct Tanks *warCar){
+void updateBullet(struct Bullets *shot, struct Tanks *warCar){
 
-    arrow = getch();
 
-    switch(arrow){
-
-        case 'b':
-            if(checkUP == 1){
-
-                addBullet(warCar->x,warCar->y,shot->dir);
-                shot->dir++;
-                mvprintw(shot->posy,shot->posx,"hey");
+               mvprintw(shot->posy,shot->posx,"hey");
                 refresh();
 
 
@@ -289,12 +320,10 @@ void printbullet(struct Bullets *shot, struct Tanks *warCar){
             //            (*shot).y += 1;
 //                if((*shot).y > ((minf-1) + yInicio ))//Up limit 9
 //                    (*shot).y -= 1;
-            }
-
-            break;
 
 
-}
+
+
 }
 
 void Map(){
