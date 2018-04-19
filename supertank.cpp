@@ -206,7 +206,7 @@ int teclas(struct Tanks *move, struct Bullets *moveBullet){
             break;
         case 'b':
 
-            
+            takeTankxy();
 
             int direction = 0;
             int found = -1;
@@ -343,4 +343,10 @@ void Map(){
         printw("\n");
     }
     refresh();
+}
+
+double takeTankxy(struct tank *dir){
+
+
+    return tank->x;
 }
