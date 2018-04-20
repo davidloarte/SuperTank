@@ -1,377 +1,352 @@
 #include <stdio.h>
-#include <stdio_ext.h>
 #include <stdlib.h>
 #include <string.h>
 //for mygetch
-#include <termios.h>
 #include <unistd.h>
-#include <fcntl.h>
+#include <ncurses.h>
 
-#include <time.h>
+//For UTF-8
+#include <locale.h>
 
-#include <curses.h>
-
-#define fila  45
-#define columna 200
+#define fila  27
+#define columna 42
 
 #define minf 0
 #define minc 0
 #define maxf (fila-1)
 #define maxc (columna-1)
+#define xInicio 10
+#define yInicio 10
 
-char matriz[fila][columna];
+#define N 50
+#define M 50
+#define MAX_BULLETS 100
 
-
-int x = 5;
-int y = 5;
-char tecla;
-char flecha;
-
-
-////bola
-
-double xvel = 1;
-double yvel = 1;
-
-int xdireccion = 1;
-int ydireccion = 1;
-
-//Palas
-
-int xpala = 20;
-int ypala = 10;
-
-int xpala1 = 80;
-int ypala1 = 10;
-
-int xbola = 50;
-int ybola = 15;
-
-
-
-
-
-
-
-
+char tmp_map[fila][columna];
+char map[fila][columna] = {
+    {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2},
+    {2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2},
+    {2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2},
+    {2,0,0,1,1,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2},
+    {2,0,0,1,1,0,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,2},
+    {2,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,2},
+    {2,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2},
+    {2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2},
+    {2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,2},
+    {2,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,2},
+    {2,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,2},
+    {2,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,2},
+    {2,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,2},
+    {2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,2},
+    {2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2},
+    {2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2},
+    {2,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,2},
+    {2,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,2},
+    {2,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,2},
+    {2,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,2},
+    {2,0,0,1,1,0,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2},
+    {2,0,0,1,1,0,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2},
+    {2,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,2},
+    {2,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,2},
+    {2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2},
+    {2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2},
+    {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2}
+};
+int arrow;
+int checkRIGHT = 0;
+int checkLEFT = 0;
+int checkUP = 0;
+int checkDOWN = 0;
+int lastKey = 0;
 //Bloques
 
-typedef struct blockUnbreakable {
+struct BlockUnbreakable {
     int x;
     int y;
-} blockA;
+};
 
-
-
-typedef struct block {
+struct Block {
     int x;
     int y;
-} blockB;
+};
+//Tank
+struct Tanks {
+    double x = 0;
+    double y = 0;
+};
 
-typedef struct tanks {
-    int x = 3;
-    int y = 3;
-} Tanks;
-Tanks tank;
+struct Bullets {
+    double posx;
+    double posy;
+    double dir ;
 
-int kbhit(void);
-void gotoxy(int x, int y);
-int mygetch();
+};
 
-void dibujar_Marco();
-void pintar_tank1();
-//void pintar_pala2();
 
-void teclas();
-void tank1();
-//void pala2();
+//Funciones de Curses
+void iniciar_Curses();
+void finalizar_Curses();
 
-void movimiento_Bola();
+//Funciones del juego
+void Map();
+int teclas(struct Tanks *move, struct Bullets *moveBullet);
+void tank1(int y, int x, struct Bullets *pos);
 
+int row,col;
+struct Bullets *bullet[MAX_BULLETS] = {NULL};
+void printbullet(struct Bullets *shot, struct Tanks *warCar);
 
 int main() {
-    /*TODO pasar todo a double y comprobar que funcione bien*/
-    blockB  B;
-    blockA  A;
+    struct BlockUnbreakable blockU[N];
+    struct Block block[M];
+    struct Tanks tank;
 
 
-    char matriz[fila][columna];
+    setlocale(LC_ALL,"");
+    iniciar_Curses();
 
-    for(int i=0;i<fila;i++) {
-        for(int j=0;j<columna;j++) {
-            matriz[i][j] = 'x';
-        }
+
+    getmaxyx(stdscr,row,col);
+
+    while(teclas(&tank,bullet[MAX_BULLETS]) != KEY_BREAK){
+        clear();
+        Map();
+        tank1( (int) tank.x, (int) tank.y, bullet[MAX_BULLETS]);
+        teclas(&tank,bullet[MAX_BULLETS]);
+    //    printbullet(bullet[MAX_BULLETS],&tank);
+
+        usleep(20000);
+
     }
-
-
-    while(1){
-        system("setterm -cursor off");
-        system("clear");
-
-//        dibujar_Marco();
-
-        movimiento_Bola();
-        pintar_tank1();
-        //    pintar_pala2();
-
-        tank1();
-        //        pala2();
-
-        usleep(60000);
-    }
+    finalizar_Curses();
     return 0;
 }
 
-int kbhit(void)
-{
-    struct termios oldt, newt;
-    int ch;
-    int oldf;
-
-    tcgetattr(STDIN_FILENO, &oldt);
-    newt = oldt;
-    newt.c_lflag &= ~(ICANON | ECHO);
-    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
-    oldf = fcntl(STDIN_FILENO, F_GETFL, 0);
-    fcntl(STDIN_FILENO, F_SETFL, oldf | O_NONBLOCK);
-
-    ch = getchar();
-
-    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
-    fcntl(STDIN_FILENO, F_SETFL, oldf);
-
-    if(ch != EOF)
-    {
-        ungetc(ch, stdin);
-        return 1;
-    }
-
-    return 0;
-}
-
-
-
-
-void gotoxy(int x, int y){
-    int MAX_SCREEN_AREA = 100;
-    char essq[MAX_SCREEN_AREA]={0}; // String variable to hold the escape sequence
-    sprintf(essq, "\033[%d;%df", y,x); //\033 = ESC, [X;X valores fila, columna, "f" para indicar que es localizacion espacial
-    printf("%s", essq); //imprime la linea de texto en esa localizacion
-}
-
-int mygetch( ) {
-    struct termios oldt,
-                   newt;
-    int ch;
-    tcgetattr( STDIN_FILENO, &oldt );
-    newt = oldt;
-    newt.c_lflag &= ~( ICANON | ECHO );
-    tcsetattr( STDIN_FILENO, TCSANOW, &newt );
-    ch = getchar();
-    tcsetattr( STDIN_FILENO, TCSANOW, &oldt );
-    return ch;
-}
-
-
-void movimiento_Bola() {
-
-    //                Movimiento de la bola
-    //   gotoxy(xbola,ybola); printf("   ");
-    gotoxy(xbola,ybola); printf("(_)");
-
-    xbola = xbola + ( xvel * xdireccion );
-    ybola = ybola + ( yvel * ydireccion );
-
-
-    if ( ((xbola == xpala)||(xbola+1 == xpala)||(xbola+2 == xpala)) && ((ybola == ypala)||(ybola == ypala+1)||(ybola == ypala+2)||(ybola == ypala+3)||(ybola == ypala+4)) ){
-        xdireccion *= -1;
-        ydireccion *= -1;
-    }
-    if ( ((xbola == xpala1)||(xbola+1 == xpala1)||(xbola+2 == xpala1)) && ((ybola == ypala1)||(ybola == ypala1+1)||(ybola == ypala1+2)||(ybola == ypala1+3)||(ybola == ypala1+3)) ){
-        xdireccion *= -1;
-        ydireccion *= -1;
-    }
-
-    if((xbola<=5)|| (xbola>=99))
-        xdireccion *= -1;
-    if((ybola<=3) || (ybola>=29))
-        ydireccion *= -1;
-
-
-
-    gotoxy(55,8);printf("%d , %d", xbola,ybola);            // situacion de la bola
-    gotoxy(55,10);printf("%c", flecha);            // situacion de la bola
-}
-
-void teclas(){
-
-    /*  if( (mygetch() == '\033')) {
-
-        mygetch();// == '[';
-        flecha=mygetch();
-        if(flecha=='A' && ypala1>=minf+3)
-        ypala1--;
-        if(flecha=='B' && ypala1+4<=maxf-1)
-        ypala1++;
-        __fpurge(stdin);
-        }
-        else{*/
-
-        flecha=mygetch();
-
-        if(flecha=='w' && tank.y>=minf+3)
-            tank.y--;
-        if(flecha=='s' && tank.y<=maxf-1)
-            tank.y++;
-        if(flecha=='a' && tank.x>=minc-1)
-            tank.x--;
-        if(flecha=='d' && tank.x<=maxc-2)
-            tank.x++;
-        __fpurge(stdin);
-        fflush(stdout);
-
-    //  }    //close(STDIN_FILENO);
-    //kbhit()
-
-
+void iniciar_Curses(){
+    initscr();
+    curs_set(0);
+    keypad(stdscr, TRUE);
+    halfdelay(1);
 
 }
 
-void tank1() {
-
-    if (kbhit()){
-
-
-        gotoxy(tank.x,tank.y);
-        printf("█");
-        gotoxy(tank.x+1,tank.y);
-        printf("█");
-        gotoxy(tank.x,tank.y+1);
-        printf("█");
-        gotoxy(tank.x+1,tank.y+1);
-        printf("█");
-        /*   gotoxy(xpala,ypala+1);
-             printf("█");
-             gotoxy(xpala,ypala+2);
-             printf("█");
-             gotoxy(xpala,ypala+3);
-             printf("█");
-             gotoxy(xpala,ypala+4);
-             printf("█");*/
-     
-        teclas();
-          fflush(stdout);
-    }
-
+void finalizar_Curses(){
+    curs_set(1);
+    endwin();
 }
-/*
-   void pala2() {
-   if (kbhit()){
-   gotoxy(xpala1,ypala1);
-   printf("█");
-   gotoxy(xpala1,ypala1+1);
-   printf("█");
-   gotoxy(xpala1,ypala1+2);
-   printf("█");
-   gotoxy(xpala1,ypala1+3);
-   printf("█");
 
-   gotoxy(xpala1,ypala1+4);
-   printf("█");
+int teclas(struct Tanks *move, struct Bullets *moveBullet){
 
-   teclas();
-   }
-   }
+    arrow = getch();
+    if(arrow != -1)
+        lastKey = arrow;
 
-void dibujar_Marco(){
+    //    check_collision();
+    mvprintw(row-5,0,"arrow es %i, y lastkey es %i", arrow, lastKey);
+    mvprintw(row-6,0,"ccheckRIGHT: %i, checkDOWN: %i, checkLEFT: %i, checkU: %i", checkRIGHT, checkDOWN, checkLEFT, checkUP);
+    switch(arrow){
 
-    Dibujar marco
+        case KEY_UP:
+            if(checkUP != 0){
+                (*move).y += 1;
+                if((*move).y > ((minf-1) + yInicio ))//Up limit 9
+                    (*move).y -= 1;
 
-
-    for(int f=0; f<fila;f++) {
-        for(int c=0;c<columna;c++) {
-            if(((f) == minf) || ((f) == maxf)){
-                if( ((f==minf)&&(c==minc)) || ((f==minf)&&(c==maxc)) || ((f==maxf)&&(c==minc)) || ((f==maxf)&&(c==maxc)) )
-                    printf("%cx", matriz[f][c] );
-                else printf("x");
+                checkRIGHT = 0;
+                checkDOWN  = 0;
+                checkLEFT  = 0;
             }
-            else
-                if(((f) >= (minf)) || ((f) <= (maxf))) {
-                    if( (c<(minc+1)) ||(c>(maxc-1)) )
-                        printf("l%c",matriz[f][c]);
-                    else
-                        printf(" ");
+            checkUP += 1;
+            if(checkUP > 1)
+                checkUP -= 1;
+            break;
+
+        case KEY_LEFT:
+          if(checkLEFT != 0){
+                (*move).x += 1;
+                if((*move).x > ((minc-1) + xInicio ))//Left limit 9
+                    (*move).x -= 1;
+                checkRIGHT = 0;
+                checkDOWN  = 0;
+                checkUP    = 0;
+            }
+
+            checkLEFT += 1;
+            if(checkLEFT > 1)
+                checkLEFT -= 1;
+            break;
+
+        case KEY_DOWN:
+            if(checkDOWN != 0){
+                (*move).y -= 1;
+                if( (*move).y < ((yInicio)+ ( (-maxf)+1 )) )// Down limit -15
+                    (*move).y += 1;
+                checkRIGHT = 0;
+                checkLEFT  = 0;
+                checkUP    = 0;
+            }
+
+            checkDOWN -= 1;
+            if(checkDOWN < -1)
+                checkDOWN += 1;
+            break;
+
+        case KEY_RIGHT:
+            if(checkRIGHT != 0){
+                (*move).x -= 1;
+                if( (*move).x < ((xInicio)+ ( (-maxc)+1 )) )// Right limit -30
+                    (*move).x += 1;
+                checkDOWN  = 0;
+                checkLEFT  = 0;
+                checkUP    = 0;
+            }
+            checkRIGHT -= 1;
+            if(checkRIGHT < -1)
+                checkRIGHT += 1;
+            break;
+        case 'b':
+
+            takeTankxy();
+
+            int direction = 0;
+            int found = -1;
+            if(checkRIGHT = -1)
+                mvprintw((*move).y-1,(*move).x, "*");
+
+            if(checkLEFT = 1)
+                mvprintw((*move).y+1,(*move).x, "*");
+
+            if(checkUP = 1)
+                mvprintw((*move).y-1,(*move).x, "*");
+
+            if(checkDOWN = -1)
+                mvprintw((*move).y+1,(*move).x, "*");
+
+
+            for(int i = 0; i < MAX_BULLETS; i++)
+            {
+                if(bullet[i] == NULL)
+                {
+                    found = i;
+                    break;
                 }
+            }
+
+            if(found >= 0)
+            {
+                int i = found;
+                bullet[i] = (Bullets*) malloc(sizeof(Bullets));
+                bullet[i]->posx = (*move).x;
+                bullet[i]->posy = (*move).y;
+                bullet[i]->dir = direction;
+            }           //updateBullet((*moveBullet).y,(*moveBullet).x);
 
 
+            break;
+    }
+    refresh();
+    return arrow;
+}
+
+void tank1(int x, int y, struct Bullets *pos) {
+    int algo;
+
+    algo=mvprintw(yInicio - y, xInicio - x,"H");
+    if(ERR == algo){
+        mvprintw(row-2,0,"This screen has %d rows and %d columns\n",row,col);
+        mvprintw(row-1,0,"errah, %i,%i no es una direccio valida\n", yInicio - y, xInicio - x);
+        /*
+           fprintf(stderr, "errah, %i,%i no es una direccio valida\n", yInicio - y, xInicio - x);
+           if((xInicio - x)<0)
+           tank1(x+1, y);
+           if((yInicio - y)<0)
+           tank1(x, y+1);*/
+    }
+    mvprintw(row-1,0,"tank 1 está en, %i,%i", yInicio - y, xInicio - x);
+    mvprintw(row-2,0,"tank 1 está en, %i,%i", y, x);
+//    mvprintw(row-3,0,"bala está en, %i,%i", pos.posy, pos.posx);
+
+    refresh();
+}
+void addBullet(double x, double y, double direction){
+
+    int found = -1;
+    for(int i = 0; i < MAX_BULLETS; i++)
+    {
+        if(bullet[i] == NULL)
+        {
+            found = i;
+            break;
         }
-        printf("\n");
     }
 
+    if(found >= 0)
+    {
+        int i = found;
+        bullet[i] = (Bullets*) malloc(sizeof(Bullets));
+        bullet[i]->posx = x;
+        bullet[i]->posy = y;
+        bullet[i]->dir = direction;
+    }
 }
-*/
-void pintar_tank1(){
-    gotoxy(55,5);printf("%d , %d", tank.x,tank.y);
 
-         gotoxy(tank.x,tank.y);
-        printf("█");
-        gotoxy(tank.x+1,tank.y);
-        printf("█");
-        gotoxy(tank.x,tank.y+1);
-        printf("█");
-        gotoxy(tank.x+1,tank.y+1);
-        printf("█");
-          fflush(stdout);
-    /*   gotoxy(xpala,ypala+1);
-         printf("█");
-         gotoxy(xpala,ypala+2);
-         printf("█");
-         gotoxy(xpala,ypala+3);
-         printf("█");
-         gotoxy(xpala,ypala+4);
-         printf("█");*/
+void removeBullet(int i){
+    if(bullet[i])
+    {
+        free(bullet[i]);
+        bullet[i] = NULL;
+    }
 }
-/*
-   void pintar_pala2(){
-   gotoxy(55,6);printf("%d , %d", xpala1,ypala1);
+/*void updateBullet(struct Tanks *warCar){
+    addBullet(&warCar);
 
-   gotoxy(xpala1,ypala1);
-   printf("█");
-   gotoxy(xpala1,ypala1+1);
-   printf("█");
-   gotoxy(xpala1,ypala1+2);
-   printf("█");
-   gotoxy(xpala1,ypala1+3);
-   printf("█");
-   gotoxy(xpala1,ypala1+4);
-   printf("█");
-
-   }
-
-*/
-
-//pintar palas
-//
-//
-//
-/*        gotoxy(55,5);printf("%d , %d", xpala,ypala);
-
-          gotoxy(xpala,ypala);
-          printf(" ");
-          gotoxy(xpala,ypala+1);
-          printf(" ");
-          gotoxy(xpala,ypala+2);
-          printf(" ");
-          gotoxy(xpala,ypala+3);
-          printf(" ");*/
+}*/
+void updateBullet(struct Bullets *shot, struct Tanks *warCar){
 
 
-/*    gotoxy(xpala1,ypala1);
-      printf(" ");
-      gotoxy(xpala1,ypala1+1);
-      printf(" ");
-      gotoxy(xpala1,ypala1+2);
-      printf(" ");
-      gotoxy(xpala1,ypala1+3);
-      printf(" ");*/
+               mvprintw(shot->posy,shot->posx,"hey");
+                refresh();
 
+
+
+/*            if(checkUP)
+                (*shot).dir += 1;
+            if(checkDOWN)
+                (*shot).dir -= 1;
+            if(checkLEFT)
+                (*shot).dir += 1;
+            if(checkRIGHT)
+                (*shot).dir -= 1;*/
+            //            (*shot).y += 1;
+//                if((*shot).y > ((minf-1) + yInicio ))//Up limit 9
+//                    (*shot).y -= 1;
+
+
+
+
+}
+
+void Map(){
+    for(int f = 0; f < fila; f++) {
+        for (int c=0; c< columna; c++ ){
+
+            if(map[f][c]==0)
+                printw(" ");
+            if(map[f][c]==1)
+                printw("#");
+            if(map[f][c]==2){
+//                const wchar_t* block = L"\u2588"; // caracter utf-8
+//                addwstr(block);    //necesitas ncursesw para caracteres largos tipo unicode
+                printw("X");
+            }
+        }
+        printw("\n");
+    }
+    refresh();
+}
+
+double takeTankxy(struct tank *dir){
+
+
+    return tank->x;
+}
